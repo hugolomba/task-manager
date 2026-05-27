@@ -68,5 +68,10 @@ public class TaskController {
         return updatedTask;
     }
 
+    @DeleteMapping("/{id}")
+    public void deleteTask(@PathVariable Long id) {
+        tasks.removeIf(task -> task.getId().equals(id));
+
+    }
 
 }
