@@ -36,7 +36,37 @@ public class TaskController {
         return task;
     }
 
+// version without stream
+//    @PutMapping("/{id}")
+//    public Task updateTask (@PathVariable Long id, @RequestBody Task updatedTask) {
+//
+//        for (int i = 0; i < tasks.size(); i++) {
+//            Task task = tasks.get(i);
+//
+//            if (task.getId().equals(id)) {
+//                updatedTask.setId(id);
+//                updatedTask.setCreatedAt(task.getCreatedAt());
+//                tasks.set(i, updatedTask);
+//                return updatedTask;
+//            }
+//        }
+//
+//        return null;
+//    }
 
+    @PutMapping("/{id}")
+    public Task updateTask (@PathVariable Long id, @RequestBody Task updatedTask) {
+        Task foundTask = tasks.stream().filter(task -> task.getId().equals(id)).findFirst().orElse(null);
+
+        updatedTask.setId(id);
+        updatedTask.setCreatedAt(foundTask.getCreatedAt());
+
+        int index = tasks.indexOf(foundTask);
+
+        tasks.set(index, updatedTask);
+
+        return updatedTask;
+    }
 
 
 }
