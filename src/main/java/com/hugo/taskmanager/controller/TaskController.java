@@ -20,6 +20,11 @@ public class TaskController {
         return tasks;
     }
 
+    @GetMapping("/{id}")
+    public Task getTaskById (@PathVariable Long id) {
+        return tasks.stream().filter(task -> task.getId().equals(id)).findFirst().orElse(null);
+    }
+
     @PostMapping
     //@RequestBody transform the JSON coming in the request body in a Java object
     public Task createTask(@RequestBody Task task)  {
@@ -30,6 +35,8 @@ public class TaskController {
 
         return task;
     }
+
+
 
 
 }
