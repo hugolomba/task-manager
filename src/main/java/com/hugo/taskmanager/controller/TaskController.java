@@ -1,10 +1,9 @@
 package com.hugo.taskmanager.controller;
 
 import com.hugo.taskmanager.entity.Task;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,4 +19,17 @@ public class TaskController {
     public List<Task> getAllTasks() {
         return tasks;
     }
+
+    @PostMapping
+    //@RequestBody transform the JSON coming in the request body in a Java object
+    public Task createTask(@RequestBody Task task)  {
+        task.setId(nextId++);
+        task.setCreatedAt(LocalDateTime.now());
+        task.setCompleted(false);
+        tasks.add(task);
+
+        return task;
+    }
+
+
 }
