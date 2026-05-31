@@ -1,6 +1,7 @@
 package com.hugo.taskmanager.service;
 
 import com.hugo.taskmanager.entity.Task;
+import com.hugo.taskmanager.exception.TaskNotFoundException;
 import com.hugo.taskmanager.repository.TaskRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,34 +27,31 @@ public class TaskService {
         return taskRepository.findAll();
     }
 
-    public Optional<Task> getTaskById(Long id) {
-        return taskRepository.findById(id);
+    public Task getTaskById(Long id) {
+        return taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
     }
 
     public Task createTask(Task task) {
         return taskRepository.save(task);
     }
 
-    public Optional<Task> updateTask (Long id, Task updatedTask) {
+    public Task updateTask (Long id, Task updatedTask) {
 
-        return taskRepository.findById(id)
-                .map(task -> {
-                    task.setTitle(updatedTask.getTitle());
-                    task.setDescription(updatedTask.getDescription());
-                    task.setCompleted((updatedTask.getCompleted()));
-                   return taskRepository.save(task);
 
-                });
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
+
+        task.setTitle(updatedTask.getTitle());
+        task.setDescription(updatedTask.getDescription());
+        task.setCompleted((updatedTask.getCompleted()));
+        return taskRepository.save(task);
+
+
     }
 
-    public boolean deleteTask(Long id) {
+    public void deleteTask(Long id) {
 
-        return taskRepository.findById(id)
-                .map(task -> {
-                    taskRepository.delete(task);
-                    return true;
-                })
-                .orElse(false);
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
+        taskRepository.delete(task);
     }
 
     public List<Task> gateTasksByCompletionStatus(boolean status) {
