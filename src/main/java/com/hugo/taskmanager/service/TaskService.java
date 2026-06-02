@@ -6,6 +6,8 @@ import com.hugo.taskmanager.entity.Task;
 import com.hugo.taskmanager.exception.TaskNotFoundException;
 import com.hugo.taskmanager.mapper.TaskMapper;
 import com.hugo.taskmanager.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +33,13 @@ public class TaskService {
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
+
+    // paginated version of getAllTasks
+    public Page<Task> getAllTasks(Pageable pageable) {
+
+        return taskRepository.findAll(pageable);
+    }
+
 
     public TaskResponse getTaskById(Long id) {
         Task retrieveTask = taskRepository.findById(id)
@@ -58,10 +67,19 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
-    public List<TaskResponse> gateTasksByCompletionStatus(boolean status) {
+    public List<TaskResponse> getTasksByCompletionStatus(boolean status) {
         List<Task> tasks = taskRepository.findTasksByCompletionStatus(status);
 
         return taskMapper.toResponseList(tasks);
+    }
+
+    // paginated version of getTaskByCompletionStatus
+
+    public Page<TaskResponse> gateTasksByCompletionStatus(boolean status, Pageable pageable) {
+
+        final Page<Task> completedTasks = (Page<Task>) taskRepository.findTasksByCompletionStatus(status, pageable);
+
+        return completedTasks.map(taskMapper::toResponse);
     }
 
     public List<TaskResponse> searchTasksByTitle(String title) {
@@ -69,12 +87,12 @@ public class TaskService {
 
         return taskMapper.toResponseList(tasks);
     }
-
-    public List<TaskResponse> getTasksByCompletionStatus(@RequestParam boolean completed) {
-        List<Task> tasks = taskRepository.findTasksByCompletionStatus(completed);
-
-        return taskMapper.toResponseList(tasks);
-    }
+//
+//    public List<TaskResponse> getTasksByCompletionStatus(@RequestParam boolean completed) {
+//        List<Task> tasks = taskRepository.findTasksByCompletionStatus(completed);
+//
+//        return taskMapper.toResponseList(tasks);
+//    }
 
 
 }
