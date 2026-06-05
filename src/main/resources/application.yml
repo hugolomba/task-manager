@@ -21,3 +21,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+# App info
+app:
+ name: Task Manager
+ version: 1.0.0
+ max-tasks-per-page: 10
