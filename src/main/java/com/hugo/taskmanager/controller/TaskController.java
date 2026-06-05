@@ -29,10 +29,10 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-//    @GetMapping
-//    public List<Task> getAllTasks() {
-//        return taskService.getAllTasks();
-//    }
+    @GetMapping("/all")
+    public List<Task> getAllTasks() {
+        return taskService.getAllTasks();
+    }
 
 //    Filtering
     @GetMapping("/search")
@@ -73,7 +73,7 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt()))
+                        task.getCreatedAt(), null))
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
@@ -109,7 +109,7 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt()))
+                        task.getCreatedAt(), null))
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
