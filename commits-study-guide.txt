@@ -1,0 +1,45 @@
+dcef371 - first commit
+
+0099957 - add Task POJO
+
+68c2d17 - Created the TaskController with a get method. for now only using in-memory database
+
+1307a60 - Created a Post request to creat a new task
+
+4de8e13 - Add a get mapping to get a task by the id. The method uses java stream to find it
+
+9b3e78c - Add a update method
+
+21192fc - Add a delete method
+
+15ec1aa - Add the annotations to define the tables. We have the entity class that gonna be the object in the database
+
+c9708e7 - I created a task repository to deal with the database. This task Repository is a interface that extends JpaRepository and I need to pass to it the type od the entity and the type of the id <Task, Long>
+
+ff3a5ce - Refactored the code to make the TaskController class use the TaskRepository bean
+
+a9d3544 - Refactored the code to insert a Service layer to deal with the business logic. The service layer uses @Transational. Now the TaskController class deals with the http request and call the logic inside the TaskService
+
+e45b5c2 - Created a exception class to handle errors and refactored the code to throw this exception
+
+61be684 - Define input validation in the entity class, for example "@Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")"
+
+27d0e90 - To make the input validation work, I add the @Valid annotation to the Controller class. And also add the custom exception handler to deal with the errors coming from this validation.
+
+f278ea8 - Created dtos classes to deal with the requests and responses, to avoid exposing info. Created a mapper class to convert the entity to dto. Refactored the code to use those dto.
+
+543523f - implemented pagination. Add the method getAllTasks receiving a paginable to return the response with pagination.
+
+09dc658 - implemented filtering
+
+aa3a0c9 - add entity relationship
+
+0d121e7 - translated the configuration to application.yml
+
+2417077 - Created a Info and advanced info controllers to show information that are inside the application.yml
+
+bc38114 - Created a new application.yml to test the use of spring profiles, testing and allowing having different profiles for the same application
+
+e287792 - Using actuator to check the application running status and info
+
+bad10a8 - Add swagger/openapi for documentation
