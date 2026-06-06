@@ -48,3 +48,9 @@ app:
  name: Task Manager
  version: 1.0.0
  max-tasks-per-page: 10
+
+
+logging:
+  level:
+    org.springdoc: DEBUG
+    org.springframework.web: DEBUG
