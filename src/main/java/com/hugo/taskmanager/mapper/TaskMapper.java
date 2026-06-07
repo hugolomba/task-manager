@@ -26,29 +26,22 @@ public class TaskMapper {
         this.userMapper = userMapper;
     }
 
-    public Task toEntity(TaskRequest request) {
+    public Task toEntity(TaskRequest request, User user, Category category) {
 
-        Category category = null;
-        User user = null;
+        Task task = new Task();
 
-        System.out.println(request.categoryId());
-        System.out.println(request.userId());
+        task.setTitle(request.title());
 
-        if (request != null && request.categoryId() != null) {
-            category = categoryService.findById(request.categoryId());
-        }
+        task.setDescription(request.description());
 
-        if (request != null && request.userId() != null) {
-            user = userService.getUserById(request.userId());
-        }
+        task.setCompleted(request.completed());
 
-        return Task.builder()
-                .title(request.title())
-                .description(request.description())
-                .completed(request.completed() != null ? request.completed() : false)
-                .category(category)
-                .user(user)
-                .build();
+        task.setUser(user);
+
+        task.setCategory(category);
+
+        return task;
+
     }
 
     public TaskResponse toResponse(Task task) {

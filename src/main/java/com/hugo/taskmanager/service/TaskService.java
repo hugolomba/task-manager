@@ -2,10 +2,14 @@ package com.hugo.taskmanager.service;
 
 import com.hugo.taskmanager.dto.TaskRequest;
 import com.hugo.taskmanager.dto.TaskResponse;
+import com.hugo.taskmanager.entity.Category;
 import com.hugo.taskmanager.entity.Task;
+import com.hugo.taskmanager.entity.User;
 import com.hugo.taskmanager.exception.TaskNotFoundException;
 import com.hugo.taskmanager.mapper.TaskMapper;
+import com.hugo.taskmanager.repository.CategoryRepository;
 import com.hugo.taskmanager.repository.TaskRepository;
+import com.hugo.taskmanager.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +28,14 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, UserRepository userRepository, CategoryRepository categoryRepository) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Page<Task> searchTasksByTitle(String title, Pageable pageable) {
@@ -68,7 +76,12 @@ public class TaskService {
     }
 
     public TaskResponse createTask(TaskRequest task) {
-        Task entityTask = taskMapper.toEntity(task);
+
+        User user = userRepository.findById(task.userId()).orElse(null);
+
+        Category category = categoryRepository.findById(task.categoryId()).orElse(null);
+
+        Task entityTask = taskMapper.toEntity(task, user, category);
         Task savedTask = taskRepository.save(entityTask);
         return taskMapper.toResponse(savedTask);
     }
