@@ -42,8 +42,15 @@ public class TaskService {
         return taskRepository.findByCompleted(completed, pageable);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    // returning a list of TaskReponse to not expose the entity
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll()
+
+                .stream()
+
+                .map(taskMapper::toResponse)
+
+                .toList();
     }
 
     // paginated version of getAllTasks

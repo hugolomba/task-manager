@@ -30,7 +30,7 @@ public class TaskController {
     }
 
     @GetMapping("/all")
-    public List<Task> getAllTasks() {
+    public List<TaskResponse> getAllTasks() {
         return taskService.getAllTasks();
     }
 
