@@ -12,5 +12,6 @@ public record TaskRequest(
         String description,
         Boolean completed,
         Long categoryId
+
 ) {
 }

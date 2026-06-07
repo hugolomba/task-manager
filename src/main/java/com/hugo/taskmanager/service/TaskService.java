@@ -99,12 +99,7 @@ public class TaskService {
 
         return taskMapper.toResponseList(tasks);
     }
-//
-//    public List<TaskResponse> getTasksByCompletionStatus(@RequestParam boolean completed) {
-//        List<Task> tasks = taskRepository.findTasksByCompletionStatus(completed);
-//
-//        return taskMapper.toResponseList(tasks);
-//    }
+
 
 
 }

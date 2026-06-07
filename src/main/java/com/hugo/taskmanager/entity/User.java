@@ -32,4 +32,9 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Task> tasks;
+
+    @PrePersist
+    protected void OnCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
