@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
@@ -23,10 +24,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(unique = true, updatable = false)
     private String surname;
 
     private LocalDateTime createdAt;
@@ -37,6 +41,6 @@ public class User {
     @PrePersist
     protected void OnCreate() {
         this.createdAt = LocalDateTime.now();
-        this.username = name + surname + ThreadLocalRandom.current().nextInt(1000, 10000);
+        this.username = name.toLowerCase() + "_" + surname.toLowerCase() + "_" +ThreadLocalRandom.current().nextInt(1000, 10000);
     }
 }
