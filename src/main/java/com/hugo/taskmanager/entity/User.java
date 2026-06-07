@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
 @Table(name = "users")
@@ -36,5 +37,6 @@ public class User {
     @PrePersist
     protected void OnCreate() {
         this.createdAt = LocalDateTime.now();
+        this.username = name + surname + ThreadLocalRandom.current().nextInt(1000, 10000);
     }
 }
