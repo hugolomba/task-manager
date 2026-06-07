@@ -28,10 +28,10 @@ public class UserController {
     }
 
     // Get User by ID
-    @GetMapping("{id}")
-    public UserResponse getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
+//    @GetMapping("{id}")
+//    public UserResponse getUserById(@PathVariable Long id) {
+//        return userService.getUserById(id);
+//    }
 
     // Create user
     @PostMapping

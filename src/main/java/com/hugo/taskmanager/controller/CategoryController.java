@@ -19,13 +19,13 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-//    @GetMapping
-//    public List<Category> getAll() {
-//        return categoryService.getAll();
-//    }
-
     @GetMapping
-    public Category findById(Long id) {
+    public List<Category> getAll() {
+        return categoryService.getAll();
+    }
+
+    @GetMapping("{id}")
+    public Category findById(@PathVariable Long id) {
         return categoryService.findById(id);
     }
 

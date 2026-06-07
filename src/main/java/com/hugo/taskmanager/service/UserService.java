@@ -39,9 +39,8 @@ public class UserService {
     }
 
     // Find user by id
-    public UserResponse getUserById(Long id) {
-        User retrievedUser = userRepository.findById(id).orElseThrow();
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow();
 
-        return userMapper.toResponse(retrievedUser);
     }
 }
