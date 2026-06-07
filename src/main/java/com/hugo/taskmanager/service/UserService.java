@@ -37,4 +37,11 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+
+    // Find user by id
+    public UserResponse getUserById(Long id) {
+        User retrievedUser = userRepository.findById(id).orElseThrow();
+
+        return userMapper.toResponse(retrievedUser);
+    }
 }

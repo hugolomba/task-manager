@@ -24,13 +24,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, updatable = false)
     private String username;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(unique = true, updatable = false)
+    @Column(nullable = false)
     private String surname;
 
     private LocalDateTime createdAt;

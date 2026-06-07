@@ -73,7 +73,10 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt(), null))
+                        task.getCreatedAt(),
+                        null,
+                        null)
+                )
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
@@ -109,7 +112,7 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt(), null))
+                        task.getCreatedAt(), null, null))
                 .toList();
 
         Map<String, Object> response = new HashMap<>();

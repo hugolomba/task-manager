@@ -26,6 +26,7 @@ public class TaskMapper {
 
         Category category = null;
 
+
         if (request != null && request.categoryId() != null) {
             category = categoryService.findById(request.categoryId());
         }
@@ -35,6 +36,7 @@ public class TaskMapper {
                 .description(request.description())
                 .completed(request.completed() != null ? request.completed() : false)
                 .category(category)
+
                 .build();
     }
 
