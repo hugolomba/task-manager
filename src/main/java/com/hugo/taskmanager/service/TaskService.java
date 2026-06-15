@@ -5,7 +5,9 @@ import com.hugo.taskmanager.dto.TaskResponse;
 import com.hugo.taskmanager.entity.Category;
 import com.hugo.taskmanager.entity.Task;
 import com.hugo.taskmanager.entity.User;
+import com.hugo.taskmanager.exception.CategoryNotFoundException;
 import com.hugo.taskmanager.exception.TaskNotFoundException;
+import com.hugo.taskmanager.exception.UserNotFoundException;
 import com.hugo.taskmanager.mapper.TaskMapper;
 import com.hugo.taskmanager.repository.CategoryRepository;
 import com.hugo.taskmanager.repository.TaskRepository;
@@ -77,9 +79,18 @@ public class TaskService {
 
     public TaskResponse createTask(TaskRequest task) {
 
-        User user = userRepository.findById(task.userId()).orElse(null);
+        User user = null;
+        if (task.userId() != null) {
+            user = userRepository.findById(task.userId())
+                    .orElseThrow(() -> new UserNotFoundException(task.userId()));
+        }
 
-        Category category = categoryRepository.findById(task.categoryId()).orElse(null);
+        Category category = null;
+        if (task.categoryId() != null) {
+            category = categoryRepository.findById(task.categoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException(task.categoryId()));
+        }
+
 
         Task entityTask = taskMapper.toEntity(task, user, category);
         Task savedTask = taskRepository.save(entityTask);
