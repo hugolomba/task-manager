@@ -13,6 +13,7 @@ public class UserMapper {
         return User.builder()
                 .name(userRequest.name())
                 .surname(userRequest.surname())
+                .password(userRequest.password())
                 .build();
 
     }

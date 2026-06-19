@@ -10,7 +10,11 @@ public record UserRequest(
 
     @NotBlank(message = "Surname is mandatory")
     @Size(min = 3, max = 100, message = "Surname must be between 3 and 100 characters")
-    String surname
+    String surname,
+
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 3, max = 100, message = "Password must be between 3 and 100 characters")
+    String password
 
 ) {
 }
