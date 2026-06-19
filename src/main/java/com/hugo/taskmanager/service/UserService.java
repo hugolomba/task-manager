@@ -34,8 +34,11 @@ public class UserService {
     }
 
     // Get all users
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toResponse)
+                .toList();
     }
 
     // Find user by id
