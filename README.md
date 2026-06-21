@@ -2,7 +2,6 @@
 
 A secure REST API for managing personal tasks, built with Java 21 and Spring Boot. The project includes JWT authentication, PostgreSQL persistence, Flyway migrations, Docker support, validation, pagination, filtering, and automated tests.
 
-This project was built as a backend portfolio project to demonstrate production-style API development with Spring Boot.
 
 ## Tech Stack
 
@@ -13,9 +12,7 @@ This project was built as a backend portfolio project to demonstrate production-
 - Spring Data JPA
 - PostgreSQL
 - Flyway
-- Bean Validation
 - Docker and Docker Compose
-- Maven
 - JUnit 5 and Mockito
 - Springdoc OpenAPI / Swagger UI
 
@@ -74,7 +71,7 @@ docker compose up --build
 Services:
 
 - API: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
 - PostgreSQL: `localhost:5432`
 - pgAdmin: `http://localhost:5050`
 
