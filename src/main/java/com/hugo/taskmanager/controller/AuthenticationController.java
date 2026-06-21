@@ -6,6 +6,9 @@ import com.hugo.taskmanager.entity.User;
 import com.hugo.taskmanager.mapper.UserMapper;
 import com.hugo.taskmanager.repository.UserRepository;
 import com.hugo.taskmanager.security.JwtUtil;
+import com.hugo.taskmanager.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,13 +27,15 @@ public class AuthenticationController {
     private final PasswordEncoder encoder;
     private final JwtUtil jwtUtils;
     private final UserMapper userMapper;
+    private final UserService userService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager,UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtils, UserMapper userMapper) {
+    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtils, UserMapper userMapper, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.encoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.userMapper = userMapper;
+        this.userService = userService;
     }
 
     @PostMapping("/signin")
@@ -50,15 +55,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public UserResponse registerUser(@RequestBody UserRequest userRequest) {
-//        if (userRepository.existsByUsername(userRequest.getUsername()) {
-//            return "User already exists!";
-//        }
+    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest userRequest) {
 
-        final User newUser = userMapper.toEntity(userRequest);
-        newUser.setPassword(encoder.encode(newUser.getPassword()));
-
-        userRepository.save(newUser);
-        return userMapper.toResponse(newUser);
+        UserResponse createdUser = userService.createUser(userRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 }
