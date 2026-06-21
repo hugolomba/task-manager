@@ -14,15 +14,10 @@ import com.hugo.taskmanager.repository.TaskRepository;
 import com.hugo.taskmanager.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -40,50 +35,44 @@ public class TaskService {
         this.categoryRepository = categoryRepository;
     }
 
-    public Page<Task> searchTasksByTitle(String title, Pageable pageable) {
-        return taskRepository.findByTitleContainingIgnoreCase(title, pageable);
+    public Page<TaskResponse> searchTasksByTitle(String username, String title, Pageable pageable) {
+        return taskRepository.findByUserUsernameAndTitleContainingIgnoreCase(username, title, pageable)
+                .map(taskMapper::toResponse);
     }
 
-    public Page<Task> searchTasksByTitleAndCompletion(String title, Boolean completed, Pageable pageable) {
-        return taskRepository.findByTitleContainingAndCompleted(title, completed, pageable);
+    public Page<TaskResponse> searchTasksByTitleAndCompletion(String username, String title, Boolean completed, Pageable pageable) {
+        return taskRepository.findByUserUsernameAndTitleContainingIgnoreCaseAndCompleted(username, title, completed, pageable)
+                .map(taskMapper::toResponse);
     }
 
-    public Page<Task> getTasksByCompletion(Boolean completed, Pageable pageable) {
-        return taskRepository.findByCompleted(completed, pageable);
+    public Page<TaskResponse> getTasksByCompletion(String username, Boolean completed, Pageable pageable) {
+        return taskRepository.findByUserUsernameAndCompleted(username, completed, pageable)
+                .map(taskMapper::toResponse);
     }
 
-    // returning a list of TaskReponse to not expose the entity
-    public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll()
-
+    public List<TaskResponse> getAllTasks(String username) {
+        return taskRepository.findByUserUsername(username)
                 .stream()
-
                 .map(taskMapper::toResponse)
-
                 .toList();
     }
 
-    // paginated version of getAllTasks
-    public Page<Task> getAllTasks(Pageable pageable) {
-
-        return taskRepository.findAll(pageable);
+    public Page<TaskResponse> getAllTasks(String username, Pageable pageable) {
+        return taskRepository.findByUserUsername(username, pageable)
+                .map(taskMapper::toResponse);
     }
 
 
-    public TaskResponse getTaskById(Long id) {
-        Task retrieveTask = taskRepository.findById(id)
+    public TaskResponse getTaskById(String username, Long id) {
+        Task retrieveTask = taskRepository.findByIdAndUserUsername(id, username)
                 .orElseThrow(() -> new TaskNotFoundException(id));
 
         return taskMapper.toResponse(retrieveTask);
     }
 
-    public TaskResponse createTask(TaskRequest task) {
-
-        User user = null;
-        if (task.userId() != null) {
-            user = userRepository.findById(task.userId())
-                    .orElseThrow(() -> new UserNotFoundException(task.userId()));
-        }
+    public TaskResponse createTask(String username, TaskRequest task) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         Category category = null;
         if (task.categoryId() != null) {
@@ -97,40 +86,30 @@ public class TaskService {
         return taskMapper.toResponse(savedTask);
     }
 
-    public TaskResponse updateTask (Long id, TaskRequest updatedTask) {
+    public TaskResponse updateTask(String username, Long id, TaskRequest updatedTask) {
 
-        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
+        Task task = taskRepository.findByIdAndUserUsername(id, username)
+                .orElseThrow(() -> new TaskNotFoundException(id));
         taskMapper.updateEntityFromRequest(task, updatedTask);
         return taskMapper.toResponse(taskRepository.save(task));
     }
 
-    public void deleteTask(Long id) {
+    public void deleteTask(String username, Long id) {
 
-        Task task = taskRepository.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
+        Task task = taskRepository.findByIdAndUserUsername(id, username)
+                .orElseThrow(() -> new TaskNotFoundException(id));
         taskRepository.delete(task);
     }
 
-    public List<TaskResponse> getTasksByCompletionStatus(boolean status) {
-        List<Task> tasks = taskRepository.findTasksByCompletionStatus(status);
+    public List<TaskResponse> getTasksByCompletionStatus(String username, boolean status) {
+        List<Task> tasks = taskRepository.findByUserUsernameAndCompleted(username, status);
 
         return taskMapper.toResponseList(tasks);
     }
 
-    // paginated version of getTaskByCompletionStatus
-
-    public Page<TaskResponse> gateTasksByCompletionStatus(boolean status, Pageable pageable) {
-
-        final Page<Task> completedTasks = (Page<Task>) taskRepository.findTasksByCompletionStatus(status, pageable);
-
-        return completedTasks.map(taskMapper::toResponse);
-    }
-
-    public List<TaskResponse> searchTasksByTitle(String title) {
-        List<Task> tasks = taskRepository.findByTitleContainingIgnoreCase(title);
+    public List<TaskResponse> searchTasksByTitle(String username, String title) {
+        List<Task> tasks = taskRepository.findByUserUsernameAndTitleContainingIgnoreCase(username, title);
 
         return taskMapper.toResponseList(tasks);
     }
-
-
-
 }

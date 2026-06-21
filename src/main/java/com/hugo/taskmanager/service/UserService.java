@@ -3,8 +3,10 @@ package com.hugo.taskmanager.service;
 import com.hugo.taskmanager.dto.UserRequest;
 import com.hugo.taskmanager.dto.UserResponse;
 import com.hugo.taskmanager.entity.User;
+import com.hugo.taskmanager.exception.UsernameAlreadyExistsException;
 import com.hugo.taskmanager.mapper.UserMapper;
 import com.hugo.taskmanager.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,17 +18,23 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder encoder;
 
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder encoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.encoder = encoder;
     }
 
-    // Create user
+    // Create/Register user
     public UserResponse createUser(UserRequest user) {
+        if (userRepository.existsByUsername(user.username())) {
+            throw new UsernameAlreadyExistsException(user.username());
+        }
 
         User userEntity = userMapper.toEntity(user);
+        userEntity.setPassword(encoder.encode(userEntity.getPassword()));
         User savedEntity = userRepository.save(userEntity);
 
         return userMapper.toResponse(savedEntity);
@@ -44,6 +52,5 @@ public class UserService {
     // Find user by id
     public User getUserById(Long id) {
         return userRepository.findById(id).orElseThrow();
-
     }
 }

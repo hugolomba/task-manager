@@ -5,7 +5,6 @@ import com.hugo.taskmanager.entity.Category;
 import com.hugo.taskmanager.entity.Task;
 import com.hugo.taskmanager.entity.User;
 import com.hugo.taskmanager.service.CategoryService;
-import com.hugo.taskmanager.service.UserService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -17,13 +16,9 @@ import java.util.List;
 public class TaskMapper {
 
     private final CategoryService categoryService;
-    private final UserService userService;
-    private final UserMapper userMapper;
 
-    public TaskMapper(CategoryService categoryService, UserService userService, UserMapper userMapper) {
+    public TaskMapper(CategoryService categoryService) {
         this.categoryService = categoryService;
-        this.userService = userService;
-        this.userMapper = userMapper;
     }
 
     public Task toEntity(TaskRequest request, User user, Category category) {
@@ -34,7 +29,7 @@ public class TaskMapper {
 
         task.setDescription(request.description());
 
-        task.setCompleted(request.completed());
+        task.setCompleted(request.completed() != null ? request.completed() : false);
 
         task.setUser(user);
 
@@ -80,7 +75,7 @@ public class TaskMapper {
     public void updateEntityFromRequest(Task task, TaskRequest request) {
         task.setTitle(request.title());
         task.setDescription(request.description());
-        task.setCompleted(request.completed());
+        task.setCompleted(request.completed() != null ? request.completed() : task.getCompleted());
 
         if (request.categoryId() != null) {
             task.setCategory(categoryService.findById(request.categoryId()));
