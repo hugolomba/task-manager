@@ -49,13 +49,14 @@ public class AuthenticationController {
         return jwtUtils.generateToken(userDetails.getUsername());
     }
 
-    @PostMapping("signup")
+    @PostMapping("/signup")
     public UserResponse registerUser(@RequestBody UserRequest userRequest) {
 //        if (userRepository.existsByUsername(userRequest.getUsername()) {
 //            return "User already exists!";
 //        }
 
         final User newUser = userMapper.toEntity(userRequest);
+        newUser.setPassword(encoder.encode(newUser.getPassword()));
 
         userRepository.save(newUser);
         return userMapper.toResponse(newUser);

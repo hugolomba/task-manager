@@ -42,4 +42,10 @@ public class UserController {
 
     }
 
+    // Test all access
+    @GetMapping("/welcome")
+    public String allAccess() {
+        return "Everyone access";
+    }
+
 }
