@@ -14,6 +14,7 @@ public class UserMapper {
                 .name(userRequest.name())
                 .surname(userRequest.surname())
                 .password(userRequest.password())
+                .username(userRequest.username())
                 .build();
 
     }

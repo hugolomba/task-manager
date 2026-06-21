@@ -44,6 +44,5 @@ public class User {
     @PrePersist
     protected void OnCreate() {
         this.createdAt = LocalDateTime.now();
-        this.username = name.toLowerCase() + "_" + surname.toLowerCase() + "_" +ThreadLocalRandom.current().nextInt(1000, 10000);
     }
 }

@@ -14,7 +14,11 @@ public record UserRequest(
 
     @NotBlank(message = "Password is mandatory")
     @Size(min = 3, max = 100, message = "Password must be between 3 and 100 characters")
-    String password
+    String password,
+
+    @NotBlank(message = "Username is mandatory")
+    @Size(min = 3, max = 100, message = "Username must be between 3 and 20 characters")
+    String username
 
 ) {
 }
