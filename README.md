@@ -1,122 +1,163 @@
 # Task Manager API
 
-A RESTful API for task management built with Spring Boot 4, featuring pagination, filtering, category support, and interactive API documentation via Swagger UI.
+A secure REST API for managing personal tasks, built with Java 21 and Spring Boot. The project includes JWT authentication, PostgreSQL persistence, Flyway migrations, Docker support, validation, pagination, filtering, and automated tests.
+
+This project was built as a backend portfolio project to demonstrate production-style API development with Spring Boot.
 
 ## Tech Stack
 
-- **Java 21**
-- **Spring Boot 4.0.6**
-- **Spring Data JPA** — data persistence with PostgreSQL
-- **Flyway** — database migrations
-- **Spring Security + JWT** — stateless authentication
-- **Spring Validation** — request body validation
-- **Spring Actuator** — health checks and monitoring endpoints
-- **Springdoc OpenAPI (Swagger UI)** — interactive API documentation
-- **Lombok** — boilerplate reduction
-- **Maven** — build and dependency management
+- Java 21
+- Spring Boot 4
+- Spring Web MVC
+- Spring Security with JWT
+- Spring Data JPA
+- PostgreSQL
+- Flyway
+- Bean Validation
+- Docker and Docker Compose
+- Maven
+- JUnit 5 and Mockito
+- Springdoc OpenAPI / Swagger UI
 
-## Project Structure
+## Main Features
 
-```
-src/main/java/com/hugo/taskmanager/
-├── controller/
-│   ├── TaskController.java          # Task CRUD and search endpoints
-│   ├── CategoryController.java      # Category endpoints
-│   ├── AuthenticationController.java # Signup and signin endpoints
-│   ├── UserController.java          # User endpoints
-│   ├── InfoController.java          # App info endpoint
-│   └── InfoControllerAdvanced.java
-├── service/
-│   ├── TaskService.java
-│   ├── UserService.java
-│   └── CategoryService.java
-├── repository/
-│   ├── TaskRepository.java          # Custom JPQL queries + pagination
-│   ├── UserRepository.java
-│   └── CategoryRepository.java
-├── entity/
-│   ├── Task.java
-│   ├── User.java
-│   └── Category.java
-├── dto/
-│   ├── TaskRequest.java
-│   ├── TaskResponse.java
-│   ├── UserRequest.java
-│   ├── UserResponse.java
-│   ├── LoginRequest.java
-│   ├── AuthResponse.java
-│   ├── CategoryRequest.java
-│   └── CategoryResponse.java
-├── mapper/
-│   └── TaskMapper.java
-├── exception/
-│   ├── GlobalExceptionHandler.java  # Centralized error handling
-│   ├── TaskNotFoundException.java
-│   ├── CategoryNotFoundException.java
-│   ├── UserNotFoundException.java
-│   └── UsernameAlreadyExistsException.java
-└── config/
-    └── AppProperties.java
+- User registration and login
+- BCrypt password hashing
+- JWT-based stateless authentication
+- Authenticated users can manage only their own tasks
+- Task CRUD operations
+- Category creation and lookup support
+- Pagination and filtering for task search
+- Centralized exception handling
+- Request validation with clear error responses
+- PostgreSQL schema management with Flyway
+- Dockerized local environment
+- Unit tests for services and authentication flow
+
+## Architecture
+
+The application follows a layered Spring Boot structure:
+
+```text
+controller  -> HTTP endpoints and request handling
+service     -> business rules and transaction boundaries
+repository  -> database access through Spring Data JPA
+entity      -> JPA database models
+dto         -> request and response contracts
+mapper      -> conversion between entities and DTOs
+security    -> JWT filter, authentication entry point, security config
+exception   -> centralized error handling
 ```
 
-## Getting Started
+Key design decisions:
+
+- Controllers do not expose JPA entities for tasks and users.
+- Passwords are never returned in API responses.
+- Tasks are linked to the authenticated user from the JWT, not to a `userId` supplied by the client.
+- Flyway owns the database schema instead of relying on Hibernate auto-DDL.
+- Docker Compose can run the API, PostgreSQL, and pgAdmin together.
+
+## Running Locally
 
 ### Prerequisites
 
 - Java 21+
 - Maven 3.8+
-- Docker and Docker Compose, if you want to run the included PostgreSQL setup
+- Docker and Docker Compose
 
-### Running the application
+### Option 1: Run With Docker Compose
 
 ```bash
-# Start PostgreSQL and pgAdmin
-docker-compose up -d
+docker compose up --build
+```
 
-# Run with Maven wrapper
+Services:
+
+- API: `http://localhost:8080`
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- PostgreSQL: `localhost:5432`
+- pgAdmin: `http://localhost:5050`
+
+pgAdmin credentials:
+
+```text
+Email: admin@admin.com
+Password: admin
+```
+
+PostgreSQL credentials:
+
+```text
+Database: taskdb
+Username: taskuser
+Password: 1234
+```
+
+### Option 2: Run API With Maven
+
+Start PostgreSQL first:
+
+```bash
+docker compose up -d postgres pgadmin
+```
+
+Then run the API:
+
+```bash
 ./mvnw spring-boot:run
-
-# Or on Windows
-mvnw.cmd spring-boot:run
 ```
 
-The application starts on `http://localhost:8080` by default.
+## Configuration
 
-PostgreSQL runs on `localhost:5432`, and pgAdmin is available at `http://localhost:5050`.
+The application reads database and JWT values from environment variables, with local defaults in `application.properties`.
 
-## API Documentation (Swagger UI)
+| Variable | Default |
+|----------|---------|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/taskdb` |
+| `SPRING_DATASOURCE_USERNAME` | `taskuser` |
+| `SPRING_DATASOURCE_PASSWORD` | `1234` |
+| `JWT_SECRET` | local development secret |
+| `JWT_EXPIRATION` | `3600000` |
 
-Interactive API docs are available at:
+## Authentication
 
-```
-http://localhost:8080/swagger-ui.html
-```
+Most endpoints require a JWT:
 
-OpenAPI JSON spec:
-
-```
-http://localhost:8080/v3/api-docs
-```
-
-## Endpoints
-
-### Auth — `/api/v1/auth`
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/v1/auth/signup` | Register a new user |
-| `POST` | `/api/v1/auth/signin` | Authenticate and return a JWT token |
-
-Signin request:
-
-```json
-{
-  "username": "hugo",
-  "password": "secret"
-}
+```http
+Authorization: Bearer <token>
 ```
 
-Signin response:
+Public endpoints:
+
+- `POST /api/v1/auth/signup`
+- `POST /api/v1/auth/signin`
+- `GET /api/v1/users/welcome`
+
+### Register
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Hugo",
+    "surname": "Lomba",
+    "username": "hugo",
+    "password": "password123"
+  }'
+```
+
+### Login
+
+```bash
+curl -X POST http://localhost:8080/api/v1/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "hugo",
+    "password": "password123"
+  }'
+```
+
+Response:
 
 ```json
 {
@@ -124,107 +165,156 @@ Signin response:
 }
 ```
 
-All endpoints except `/api/v1/auth/**` and `/api/v1/users/welcome` require this header:
+Store the token:
 
-```http
-Authorization: Bearer <token>
+```bash
+TOKEN="paste-token-here"
 ```
 
-### Tasks — `/api/v1/tasks`
+## API Examples
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/tasks` | List all tasks (paginated) |
-| `GET` | `/api/v1/tasks/all` | List all tasks (no pagination) |
-| `GET` | `/api/v1/tasks/{id}` | Get task by ID |
-| `POST` | `/api/v1/tasks` | Create a new task |
-| `PUT` | `/api/v1/tasks/{id}` | Update a task |
-| `DELETE` | `/api/v1/tasks/{id}` | Delete a task |
-| `GET` | `/api/v1/tasks/search` | Search tasks with filters and pagination |
-| `GET` | `/api/v1/tasks/completed/{status}` | Get tasks by completion status |
+### Create Category
 
-#### Pagination & Filtering (GET `/api/v1/tasks/search`)
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `title` | string | — | Filter by title (case-insensitive, partial match) |
-| `completed` | boolean | — | Filter by completion status |
-| `page` | int | `0` | Page number |
-| `size` | int | `10` | Page size |
-| `sortBy` | string | `createdAt` | Sort field |
-| `sortDir` | string | `DESC` | Sort direction (`ASC` or `DESC`) |
-
-### Categories — `/api/v1/categories`
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/categories` | List all categories |
-| `GET` | `/api/v1/categories/{id}` | Get category by ID |
-| `POST` | `/api/v1/categories` | Create a new category |
-
-Category request:
-
-```json
-{
-  "name": "Work",
-  "description": "Tasks related to work"
-}
+```bash
+curl -X POST http://localhost:8080/api/v1/categories \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "name": "Study",
+    "description": "College and interview preparation"
+  }'
 ```
 
-### Info — `/api/v1/info`
+### Create Task
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/api/v1/info` | Get application info (name, version, config) |
+```bash
+curl -X POST http://localhost:8080/api/v1/tasks \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "title": "Review Spring Security",
+    "description": "Study JWT filter and authentication flow",
+    "completed": false,
+    "categoryId": 1
+  }'
+```
 
-### Actuator — `/actuator`
+### List Tasks
 
-Exposed endpoints: `health`, `info`, `metrics`, `env`, `logger`, `beans`, `mappings`
+```bash
+curl http://localhost:8080/api/v1/tasks \
+  -H "Authorization: Bearer $TOKEN"
+```
 
-## Database
+### Search Tasks
 
-The application uses **PostgreSQL** by default.
+```bash
+curl "http://localhost:8080/api/v1/tasks/search?title=spring&completed=false&page=0&size=10" \
+  -H "Authorization: Bearer $TOKEN"
+```
 
-The included `docker-compose.yml` creates:
+### Update Task
 
-- database: `taskdb`
-- username: `taskuser`
-- password: `1234`
-- PostgreSQL port: `5432`
-- pgAdmin URL: `http://localhost:5050`
+```bash
+curl -X PUT http://localhost:8080/api/v1/tasks/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "title": "Review Spring Security",
+    "description": "Finish notes and examples",
+    "completed": true,
+    "categoryId": 1
+  }'
+```
 
-| Property | Value |
-|----------|-------|
-| JDBC URL | `jdbc:postgresql://localhost:5432/taskdb` |
-| Username | `taskuser` |
-| Password | `1234` |
+### Delete Task
 
-Schema changes are managed with Flyway migrations in `src/main/resources/db/migration`.
+```bash
+curl -X DELETE http://localhost:8080/api/v1/tasks/1 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Main Endpoints
+
+### Auth
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/signup` | Register a user |
+| `POST` | `/api/v1/auth/signin` | Login and receive JWT |
+
+### Tasks
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/tasks` | List authenticated user's tasks with pagination |
+| `GET` | `/api/v1/tasks/all` | List authenticated user's tasks without pagination |
+| `GET` | `/api/v1/tasks/{id}` | Get one task owned by authenticated user |
+| `POST` | `/api/v1/tasks` | Create task for authenticated user |
+| `PUT` | `/api/v1/tasks/{id}` | Update task owned by authenticated user |
+| `DELETE` | `/api/v1/tasks/{id}` | Delete task owned by authenticated user |
+| `GET` | `/api/v1/tasks/search` | Search tasks by title/status with pagination |
+| `GET` | `/api/v1/tasks/completed` | Filter tasks by completion status |
+
+### Categories
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/categories` | List categories |
+| `GET` | `/api/v1/categories/{id}` | Get category by id |
+| `POST` | `/api/v1/categories` | Create category |
 
 ## Error Handling
 
-All errors are handled globally via `GlobalExceptionHandler` and return a consistent JSON structure:
+Errors are returned in a consistent JSON format:
 
 ```json
 {
-  "timestamp": "2026-06-06T14:00:00",
+  "timestamp": "2026-06-21T13:00:00",
   "message": "Task not found with id: 99",
   "path": "/api/v1/tasks/99"
 }
 ```
 
-Validation errors return a list of field-level messages with HTTP `400 Bad Request`.
+Common responses:
 
-## Configuration
+| Status | Scenario |
+|--------|----------|
+| `400` | Validation error |
+| `401` | Invalid login or missing/invalid token |
+| `404` | Task, user, or category not found |
+| `409` | Username already exists |
 
-Key properties in `application.properties`:
+## Tests
 
-```properties
-app.name=Task Manager
-app.version=1.0.0
-app.max-tasks-per-page=10
+Run all tests:
+
+```bash
+./mvnw test
 ```
 
-## Author
+Current test coverage includes:
 
-**Hugo Lomba**
+- Task ownership rules
+- Task creation, lookup, and deletion service behavior
+- User registration and duplicate username handling
+- Password encoding during signup
+- Category creation and not-found behavior
+- Authentication controller login/signup behavior
+
+## Database Migrations
+
+Flyway migrations live in:
+
+```text
+src/main/resources/db/migration
+```
+
+Existing migrations:
+
+- `V1__init.sql`: creates users, categories, and tasks
+- `V2__add_password_to_users.sql`: adds password support to users
+
+## Project Status
+
+This is a backend portfolio project aimed at junior, internship, and graduate software engineering roles. It demonstrates core backend skills expected in a Java/Spring role: REST APIs, authentication, persistence, Docker, migrations, validation, error handling, and automated tests.
