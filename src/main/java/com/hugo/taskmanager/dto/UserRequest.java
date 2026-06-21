@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 public record UserRequest(
     @NotBlank(message = "Name is mandatory")
-    @Size(min = 3, max = 100, message = "Surname must be between 3 and 100 characters")
+    @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters")
     String name,
 
     @NotBlank(message = "Surname is mandatory")
@@ -17,7 +17,7 @@ public record UserRequest(
     String password,
 
     @NotBlank(message = "Username is mandatory")
-    @Size(min = 3, max = 100, message = "Username must be between 3 and 20 characters")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     String username
 
 ) {

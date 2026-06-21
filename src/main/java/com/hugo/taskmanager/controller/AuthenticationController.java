@@ -1,18 +1,17 @@
 package com.hugo.taskmanager.controller;
 
+import com.hugo.taskmanager.dto.AuthResponse;
+import com.hugo.taskmanager.dto.LoginRequest;
 import com.hugo.taskmanager.dto.UserRequest;
 import com.hugo.taskmanager.dto.UserResponse;
-import com.hugo.taskmanager.entity.User;
-import com.hugo.taskmanager.mapper.UserMapper;
-import com.hugo.taskmanager.repository.UserRepository;
 import com.hugo.taskmanager.security.JwtUtil;
 import com.hugo.taskmanager.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,39 +22,33 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final PasswordEncoder encoder;
     private final JwtUtil jwtUtils;
-    private final UserMapper userMapper;
     private final UserService userService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtils, UserMapper userMapper, UserService userService) {
+    public AuthenticationController(AuthenticationManager authenticationManager, JwtUtil jwtUtils, UserService userService) {
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.encoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
-        this.userMapper = userMapper;
         this.userService = userService;
     }
 
     @PostMapping("/signin")
-    public String authenticateUser(@RequestBody UserRequest userRequest) {
-
-        User userEntity = userMapper.toEntity(userRequest);
+    public ResponseEntity<AuthResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                      userEntity.getUsername(),
-                      userEntity.getPassword()
+                      loginRequest.username(),
+                      loginRequest.password()
                 )
         );
 
         final UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return jwtUtils.generateToken(userDetails.getUsername());
+        String generatedToken = jwtUtils.generateToken(userDetails.getUsername());
+
+        return ResponseEntity.status(HttpStatus.OK).body(new AuthResponse(generatedToken));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest userRequest) {
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest userRequest) {
 
         UserResponse createdUser = userService.createUser(userRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

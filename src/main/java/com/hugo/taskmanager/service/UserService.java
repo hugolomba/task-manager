@@ -3,6 +3,7 @@ package com.hugo.taskmanager.service;
 import com.hugo.taskmanager.dto.UserRequest;
 import com.hugo.taskmanager.dto.UserResponse;
 import com.hugo.taskmanager.entity.User;
+import com.hugo.taskmanager.exception.UsernameAlreadyExistsException;
 import com.hugo.taskmanager.mapper.UserMapper;
 import com.hugo.taskmanager.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,9 @@ public class UserService {
 
     // Create/Register user
     public UserResponse createUser(UserRequest user) {
+        if (userRepository.existsByUsername(user.username())) {
+            throw new UsernameAlreadyExistsException(user.username());
+        }
 
         User userEntity = userMapper.toEntity(user);
         userEntity.setPassword(encoder.encode(userEntity.getPassword()));
