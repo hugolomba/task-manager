@@ -2,10 +2,16 @@ package com.hugo.taskmanager.service;
 
 import com.hugo.taskmanager.dto.TaskRequest;
 import com.hugo.taskmanager.dto.TaskResponse;
+import com.hugo.taskmanager.entity.Category;
 import com.hugo.taskmanager.entity.Task;
+import com.hugo.taskmanager.entity.User;
+import com.hugo.taskmanager.exception.CategoryNotFoundException;
 import com.hugo.taskmanager.exception.TaskNotFoundException;
+import com.hugo.taskmanager.exception.UserNotFoundException;
 import com.hugo.taskmanager.mapper.TaskMapper;
+import com.hugo.taskmanager.repository.CategoryRepository;
 import com.hugo.taskmanager.repository.TaskRepository;
+import com.hugo.taskmanager.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +30,14 @@ public class TaskService {
 
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper, UserRepository userRepository, CategoryRepository categoryRepository) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     public Page<Task> searchTasksByTitle(String title, Pageable pageable) {
@@ -42,8 +52,15 @@ public class TaskService {
         return taskRepository.findByCompleted(completed, pageable);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    // returning a list of TaskReponse to not expose the entity
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll()
+
+                .stream()
+
+                .map(taskMapper::toResponse)
+
+                .toList();
     }
 
     // paginated version of getAllTasks
@@ -61,7 +78,21 @@ public class TaskService {
     }
 
     public TaskResponse createTask(TaskRequest task) {
-        Task entityTask = taskMapper.toEntity(task);
+
+        User user = null;
+        if (task.userId() != null) {
+            user = userRepository.findById(task.userId())
+                    .orElseThrow(() -> new UserNotFoundException(task.userId()));
+        }
+
+        Category category = null;
+        if (task.categoryId() != null) {
+            category = categoryRepository.findById(task.categoryId())
+                    .orElseThrow(() -> new CategoryNotFoundException(task.categoryId()));
+        }
+
+
+        Task entityTask = taskMapper.toEntity(task, user, category);
         Task savedTask = taskRepository.save(entityTask);
         return taskMapper.toResponse(savedTask);
     }
@@ -99,12 +130,7 @@ public class TaskService {
 
         return taskMapper.toResponseList(tasks);
     }
-//
-//    public List<TaskResponse> getTasksByCompletionStatus(@RequestParam boolean completed) {
-//        List<Task> tasks = taskRepository.findTasksByCompletionStatus(completed);
-//
-//        return taskMapper.toResponseList(tasks);
-//    }
+
 
 
 }

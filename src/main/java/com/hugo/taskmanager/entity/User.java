@@ -1,52 +1,48 @@
 package com.hugo.taskmanager.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "users")
 
-// lombok annotations
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Task {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, updatable = false, nullable = false)
+    private String username;
 
     @Column(nullable = false)
-    private String title;
-
-
-    private String description;
+    private String password;
 
     @Column(nullable = false)
-    private Boolean completed;
+    private String name;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false)
+    private String surname;
+
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @OneToMany(mappedBy = "user")
+    private List<Task> tasks;
 
     @PrePersist
-    protected void onCreate() {
+    protected void OnCreate() {
         this.createdAt = LocalDateTime.now();
     }
 }

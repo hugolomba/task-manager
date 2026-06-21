@@ -29,9 +29,25 @@ public class TaskController {
         this.taskService = taskService;
     }
 
+
+//    Get all tasks
     @GetMapping("/all")
-    public List<Task> getAllTasks() {
+    public List<TaskResponse> getAllTasks() {
         return taskService.getAllTasks();
+    }
+
+//    Get task by id
+    @GetMapping("/{id}")
+    public TaskResponse getTaskById (@PathVariable Long id) {
+    return taskService.getTaskById(id);
+}
+
+//  Create new task
+    @PostMapping
+    //@RequestBody transform the JSON coming in the request body in a Java object
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest task)  {
+        TaskResponse savedTask = taskService.createTask(task);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
 //    Filtering
@@ -73,7 +89,10 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt(), null))
+                        task.getCreatedAt(),
+                        null,
+                        null)
+                )
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
@@ -109,7 +128,7 @@ public class TaskController {
                         task.getTitle(),
                         task.getDescription(),
                         task.getCompleted(),
-                        task.getCreatedAt(), null))
+                        task.getCreatedAt(), null, null))
                 .toList();
 
         Map<String, Object> response = new HashMap<>();
@@ -123,17 +142,9 @@ public class TaskController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public TaskResponse getTaskById (@PathVariable Long id) {
-        return taskService.getTaskById(id);
-    }
 
-    @PostMapping
-    //@RequestBody transform the JSON coming in the request body in a Java object
-    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest task)  {
-        TaskResponse savedTask = taskService.createTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
-    }
+
+
 
 
     @PutMapping("/{id}")
